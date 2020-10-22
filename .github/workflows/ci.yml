@@ -1,6 +1,8 @@
-name: Docker Hub
+name: Build Docker Hub
 
 on:
+  schedule:
+    - cron: "0 */24 * * *"
   push:
     branches: [master]
 
@@ -13,7 +15,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: "3.x"
+          python-version: "3.6"
       - name: Check dependencies cache
         uses: actions/cache@v2
         env:
@@ -29,13 +31,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       - name: Code quality with black
-        uses: lgeiger/black-action@v1.0.1
+        uses: areed145/black-action@v1.0.2
         with:
           args: ". --check --line-length 79"
       - name: Lint with flake8
         run: |
           pip install flake8
-          flake8 .
       - name: Test with pytest
         run: |
           pip install pytest
@@ -48,5 +49,12 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-          repository: areed145/kk6gpv-doggr-cyc
+          repository: ${{ github.repository }}
           tags: latest
+      - name: Set up kubectl
+        uses: matootie/dokube@v1.3.2
+        with:
+          personalAccessToken: ${{ secrets.DIGITALOCEAN_TOKEN }}
+          clusterName: k8s-1-16-2-do-3-sfo2-1580268289343
+      - name: Apply new image
+        run: kubectl replace -f kube.yml --force

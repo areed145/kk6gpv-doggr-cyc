@@ -1,4 +1,4 @@
-name: Pull Request
+name: Check Pull Request
 
 on:
   pull_request:
@@ -13,7 +13,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: "3.x"
+          python-version: "3.6"
       - name: Check dependencies cache
         uses: actions/cache@v2
         env:
@@ -29,7 +29,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       - name: Code quality with black
-        uses: lgeiger/black-action@v1.0.1
+        uses: areed145/black-action@v1.0.2
         with:
           args: ". --check --line-length 79"
       - name: Lint with flake8
